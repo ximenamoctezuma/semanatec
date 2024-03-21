@@ -1,0 +1,86 @@
+from random import randrange
+from turtle import *
+from freegames import vector
+
+# Inicialización de la posición y velocidad del proyectil
+ball = vector(-200, -200)
+speed = vector(10, 0)  # Velocidad inicial del proyectil
+targets = []  # Lista para almacenar las posiciones de los balones
+
+def tap(x, y):
+    "Responde al clic en la pantalla."
+    if not inside(ball):
+        # Reposiciona el proyectil si no está dentro de la pantalla
+        ball.x = -199
+        ball.y = -199
+        # Calcula la velocidad del proyectil en función del clic
+        speed.x = (x + 200) / 25
+        speed.y = (y + 200) / 25
+
+def inside(xy):
+    "Devuelve True si la posición xy está dentro de la pantalla."
+    return -200 < xy.x < 200 and -200 < xy.y < 200
+
+def draw():
+    "Dibuja el proyectil y los balones."
+    clear()
+
+    # Dibuja los balones
+    for target in targets:
+        goto(target.x, target.y)
+        dot(20, 'blue')
+
+    # Dibuja el proyectil si está dentro de la pantalla
+    if inside(ball):
+        goto(ball.x, ball.y)
+        dot(6, 'red')
+
+    update()
+
+def move():
+    "Mueve el proyectil y los balones."
+    # Genera un nuevo balón aleatorio de vez en cuando
+    if randrange(40) == 0:
+        y = randrange(-150, 150)
+        target = vector(200, y)
+        targets.append(target)
+
+    # Mueve los balones hacia la izquierda
+    for target in targets:
+        target.x -= 5  # Ajusta la velocidad de movimiento de los balones
+
+    # Aplica la gravedad al proyectil si está dentro de la pantalla
+    if inside(ball):
+        speed.y -= 0.35
+        ball.move(speed)
+
+    # Elimina los balones que son golpeados por el proyectil
+    dupe = targets.copy()
+    targets.clear()
+
+    for target in dupe:
+        if abs(target - ball) > 13:
+            targets.append(target)
+        else:
+            ball.x = -199  # Reposiciona el proyectil si golpea un balón
+
+    # Dibuja la pantalla
+    draw()
+
+    # Reposiciona los balones que salen de la pantalla
+    for target in targets:
+        if not inside(target):
+            target.x = 200  # Reposiciona los balones en el lado derecho
+
+    # Llama a la función move() nuevamente después de un cierto tiempo
+    ontimer(move, 50)
+
+# Configuración inicial de la ventana
+setup(420, 420, 370, 0)
+hideturtle()
+up()
+tracer(False)
+onscreenclick(tap)
+move()
+done()
+
