@@ -1,0 +1,90 @@
+from random import *
+from turtle import *
+from freegames import path
+
+# Configuración inicial
+car = path('car.gif')
+emojis = ['😀', '😎', '🐶', '🐱', '🌻', '🍕', '🎉', '🎈',
+          '🦄', '🌈', '🚀', '🍦', '🎸', '📚', '🍉', '🍩',
+          '🍔', '🚲', '🎮', '🌼', '🏆', '🎨', '🎤', '🎲',
+          '🏖️', '🚗', '🏀', '⛺️', '🏰', '🍭', '🎠', '🎯']
+tiles = emojis * 2
+state = {'mark': None}
+hide = [True] * 64
+taps = 0  # Contador de taps
+
+# Función para dibujar un cuadro blanco con borde negro en (x, y)
+def square(x, y):
+    up()
+    goto(x, y)
+    down()
+    color('black', 'white')
+    begin_fill()
+    for _ in range(4):
+        forward(50)
+        left(90)
+    end_fill()
+
+# Función para convertir las coordenadas (x, y) a un índice de baldosa
+def index(x, y):
+    return int((x + 200) // 50 + ((y + 200) // 50) * 8)
+
+# Función para convertir el conteo de baldosas a coordenadas (x, y)
+def xy(count):
+    return (count % 8) * 50 - 200, (count // 8) * 50 - 200
+
+# Función para manejar los clicks
+def tap(x, y):
+    global taps  # Utilizamos la variable global taps
+
+    spot = index(x, y)
+    mark = state['mark']
+
+    if mark is None or mark == spot or tiles[mark] != tiles[spot]:
+        state['mark'] = spot
+    else:
+        hide[spot] = False
+        hide[mark] = False
+        state['mark'] = None
+        taps += 1  # Incrementa el contador de taps
+        print("Taps:", taps)
+
+    # Verifica si todas las baldosas están destapadas
+    if all(not tile for tile in hide):
+        print("¡Juego finalizado! ¡Felicidades!")
+
+# Función para dibujar la imagen del auto y las baldosas
+def draw():
+    clear()
+    goto(0, 0)
+    shape(car)
+    stamp()
+
+    for count in range(64):
+        if hide[count]:
+            x, y = xy(count)
+            square(x, y)
+
+    mark = state['mark']
+
+    if mark is not None and hide[mark]:
+        x, y = xy(mark)
+        up()
+        goto(x + 25, y)  # Centra el emoji en el cuadro
+        color('black')
+        write(tiles[mark], align='center', font=('Arial', 30, 'normal'))
+
+    update()
+    ontimer(draw, 100)
+
+# Mezcla las baldosas aleatoriamente
+shuffle(tiles)
+
+# Configuración de la pantalla
+setup(420, 420, 370, 0)
+addshape(car)
+hideturtle()
+tracer(False)
+onscreenclick(tap)
+draw()
+done()
