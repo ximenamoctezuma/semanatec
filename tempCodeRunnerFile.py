@@ -1,16 +1,12 @@
 import turtle
 import random
-from PIL import Image
 
 
-def resize_image(image_path, output_path, width, height):
-    with Image.open(image_path) as img:
-        # Redimensionar la imagen manteniendo la relación de aspecto y alta calidad
-        img = img.resize((width, height), Image.Resampling.LANCZOS)  # Actualizado aquí
-        # Guardar la imagen redimensionada como un nuevo archivo GIF
-        img.save(output_path, 'GIF')
-    return output_path
-
+def resize_image(image_path, width, height):
+    with open(image_path, 'rb') as img_file:
+        img_data = img_file.read()
+    screen.addshape("temp_image", shape=turtle.Shape("image", data=img_data))
+    return "temp_image"
 
 # Configuración de la pantalla
 screen = turtle.Screen()
@@ -19,12 +15,12 @@ screen.bgcolor("white")
 screen.setup(width=600, height=400)
 screen.tracer(0)
 
-player_shape = resize_image("images/benve2.gif", "images/benve2_resized.gif", 50, 50)
-screen.register_shape(player_shape )
+player_shape = resize_image("benve2.gif", 50, 50)
+screen.register_shape("benve2.gif")
 
 # Creación del jugador
 player = turtle.Turtle()
-player.shape(player_shape )
+player.shape(player_shape)
 player.color("blue")
 player.penup()
 player.speed(0)
@@ -54,18 +50,9 @@ score_text.penup()
 score_text.hideturtle()
 score_text.goto(0, screen_height // 2 - 40)
 
-def on_click(x, y):
-    global game_over
-    if game_over:
-        restart_game()
-    else:
-        pass
-
-
 def update_score():
     score_text.clear()
-    score_text.color("gold")
-    score_text.write(f"Score: {score}", align="center", font=("Courier New", 16, "normal"))
+    score_text.write(f"Score: {score}", align="center", font=("Arial", 16, "normal"))
 
 def move_up():
     if player_move_allowed:
@@ -84,13 +71,6 @@ screen.listen()
 screen.onkeypress(move_up, "Up")
 screen.onkeypress(move_down, "Down")
 
-image_path = "images/lsd.gif"
-rezised = "images/lsd_resized.gif"
-
-# Redimensiona la imagen
-resize_image(image_path, rezised, 50, 50)
-screen.register_shape(rezised)
-
 def create_obstacle():
     if not game_over:
         gap = random.randint(50, 150)
@@ -98,7 +78,7 @@ def create_obstacle():
         bottom_height = top_height - gap - 200
         
         top_obstacle = turtle.Turtle()
-        top_obstacle.shape(rezised)
+        top_obstacle.shape("square")
         top_obstacle.color("red")
         top_obstacle.shapesize(stretch_wid=2, stretch_len=2)
         top_obstacle.penup()
@@ -106,7 +86,7 @@ def create_obstacle():
         top_obstacle.setposition(screen_width / 2, top_height)
         
         bottom_obstacle = turtle.Turtle()
-        bottom_obstacle.shape(rezised)
+        bottom_obstacle.shape("square")
         bottom_obstacle.color("red")
         bottom_obstacle.shapesize(stretch_wid=2, stretch_len=2)
         bottom_obstacle.penup()
@@ -125,41 +105,25 @@ def move_obstacles():
         update_score()
 
 def show_start_screen():
-    screen.bgpic("images/fondojuego.gif")
     start_text = turtle.Turtle()
     start_text.penup()
     start_text.hideturtle()
     start_text.goto(0, 0)
   
-    # Mejorar el aspecto del texto
-    start_text.color("gold")
-    start_text.write("Benvenuto Run", align="center", font=("Courier New", 34, "bold"))
-
-    # Texto secundario para instrucciones
-    start_text.goto(0, -30)
-    start_text.color("white")
-    start_text.write("Click to start", align="center", font=("Courier New", 24, "italic"))
-
+    start_text.write("Benvenuto Run \n \n \n Click to start", align="center", font=("Arial", 24, "normal"))
     screen.onclick(lambda x, y: start_game(start_text))
 
 def start_game(start_text):
     global game_over, player_move_allowed, score
-
-    if game_over:
-        
-        start_text.clear()
-        game_over = False
-        player_move_allowed = True
-        score = 0
-        update_score()
-        main_game_loop()
+    start_text.clear()
+    game_over = False
+    player_move_allowed = True
+    score = 0
+    update_score()
+    main_game_loop()
 
 def restart_game():
     global game_over, player_move_allowed, score, game_over_text
-
-
-    game_over = False
-    player_move_allowed = True
 
     # Limpiar obstáculos restantes
     for obstacle in obstacles:
@@ -167,7 +131,8 @@ def restart_game():
     obstacles.clear()
 
     # Reiniciar variables
-    
+    game_over = False
+    player_move_allowed = True
     score = 0
     update_score()
 
@@ -185,8 +150,7 @@ def show_game_over_screen():
     game_over_text.penup()
     game_over_text.hideturtle()
     game_over_text.goto(0, 0)
-    game_over_text.color("gold")
-    game_over_text.write(f"Game Over\nScore: {score}\nClick to restart", align="center", font=("Courier New", 32, "bold"))
+    game_over_text.write(f"Game Over\nScore: {score}\nHigh Score: {high_score}\nClick to restart", align="center", font=("Arial", 16, "normal"))
     screen.onclick(lambda x, y: restart_game())
 
 def game_over_function():
@@ -228,3 +192,4 @@ show_start_screen()
 
 # Iniciar el bucle de eventos de la pantalla
 screen.mainloop()
+
