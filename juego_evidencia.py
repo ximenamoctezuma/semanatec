@@ -19,7 +19,7 @@ screen.bgcolor("white")
 screen.setup(width=600, height=400)
 screen.tracer(0)
 
-player_shape = resize_image("images/benve2.gif", "images/benve2_resized.gif", 50, 50)
+player_shape = resize_image("images/foto.jpeg", "images/benve2_resized.gif", 50, 50)
 screen.register_shape(player_shape )
 
 # Creación del jugador
